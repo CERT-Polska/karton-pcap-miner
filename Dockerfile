@@ -6,8 +6,8 @@ RUN apt-get update && apt-get install -y \
     tshark \
  && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt
+COPY ./requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r ./requirements.txt
 
 COPY ./README.md ./README.md
 COPY ./karton ./karton
