@@ -13,4 +13,4 @@ jobs:
       - uses: CERT-Polska/lint-python-action@v2
         with:
           source: karton/
-          python-version: 3.10
+          python-version: "3.10"
