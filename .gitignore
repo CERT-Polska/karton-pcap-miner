@@ -1,0 +1,10 @@
+.vscode
+__pycache__
+certs/
+config.ini
+venv/
+.mypy_cache/
+config.py
+build
+karton.ini
+karton_pcap_miner.egg-info/
