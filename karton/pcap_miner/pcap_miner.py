@@ -1,11 +1,11 @@
+import ipaddress
 import json
 import re
 import tempfile
 from pathlib import Path
 from subprocess import check_output
 
-import ipaddress
-from karton.core import Karton, Task, Resource
+from karton.core import Karton, Resource, Task
 
 
 def extract_ip(ip: str) -> str:
@@ -34,7 +34,8 @@ def convert_tlsmon(directory: Path) -> None:
 
 class KartonPcapMiner(Karton):
     """
-    Extract network indicators from analysis PCAPs and add push them to MWDB as attributes
+    Extract network indicators from analysis PCAPs and add push them to MWDB as
+    attributes
     """
 
     identity = "karton.pcap-miner"
@@ -56,21 +57,21 @@ class KartonPcapMiner(Karton):
         PAT = r"([\d.]+:\d+)\s+<->\s+([\d.]+:\d+)"
         matches = re.findall(PAT, output)
 
-        output = set()
+        results: set[str] = set()
         for source, destination in matches:
-            output.add(self.select_nonlocal_ip(source, destination))
+            results.add(self.select_nonlocal_ip(source, destination))
 
-        return list(output)
+        return list(results)
 
     def parse_sni_output(self, output: str) -> list[str]:
         PAT = r"^(\S+)\s+(\d+)$"
         matches = re.findall(PAT, output)
 
-        output = set()
+        results: set[str] = set()
         for hostname, port in matches:
-            output.add(f"{hostname}:{port}")
+            results.add(f"{hostname}:{port}")
 
-        return list(output)
+        return list(results)
 
     def default_parser(self, output: str) -> list[str]:
         return list(set(filter(None, output.splitlines())))
@@ -79,7 +80,9 @@ class KartonPcapMiner(Karton):
         super().__init__(*args, **kwargs)
 
         # analysis VM range, used for detecting direction in connections
-        self.vm_ip_range = ipaddress.ip_network(self.config.get("pcap-miner", "vm_ip_range", "10.0.0.0/8"))
+        self.vm_ip_range = ipaddress.ip_network(
+            self.config.get("pcap-miner", "vm_ip_range", "10.0.0.0/8")
+        )
 
         # do not report artifacts if number of results exceeds max_results
         self.max_results = self.config.getint("pcap-miner", "max_results", fallback=24)
@@ -90,10 +93,28 @@ class KartonPcapMiner(Karton):
                 self.ignorelist = json.load(f)
 
         self.analyzers = {
-            "network-http": (["-T", "fields", "-e", "http.request.full_uri"], self.default_parser),
+            "network-http": (
+                ["-T", "fields", "-e", "http.request.full_uri"],
+                self.default_parser,
+            ),
             "network-tcp": (["-z", "conv,tcp"], self.parse_tcp_conv),
-            "network-sni": (["-Y", 'ssl.handshake.extension.type == "server_name"', "-T", "fields", "-e", "tls.handshake.extensions_server_name", "-e", "tcp.dstport"], self.parse_sni_output),
-            "network-dns": (["-Y", "dns.flags.response == 0", "-T", "fields", "-e", "dns.qry.name"], self.default_parser),
+            "network-sni": (
+                [
+                    "-Y",
+                    'ssl.handshake.extension.type == "server_name"',
+                    "-T",
+                    "fields",
+                    "-e",
+                    "tls.handshake.extensions_server_name",
+                    "-e",
+                    "tcp.dstport",
+                ],
+                self.parse_sni_output,
+            ),
+            "network-dns": (
+                ["-Y", "dns.flags.response == 0", "-T", "fields", "-e", "dns.qry.name"],
+                self.default_parser,
+            ),
         }
 
     def mine_pcap(self, directory: Path) -> dict[str, list[str]]:
@@ -123,7 +144,9 @@ class KartonPcapMiner(Karton):
             filtered = [x for x in v if x not in filter_list]
 
             if self.max_results != -1 and len(filtered) > self.max_results:
-                self.log.warning("Dropping results for %s due to high count: %s", k, len(filtered))
+                self.log.warning(
+                    "Dropping results for %s due to high count: %s", k, len(filtered)
+                )
             elif filtered:
                 output[k] = sorted(filtered)
 
@@ -135,10 +158,7 @@ class KartonPcapMiner(Karton):
                 "type": "sample",
                 "stage": "analyzed",
             },
-            payload={
-                "sample": sample,
-                "attributes": results
-            }
+            payload={"sample": sample, "attributes": results},
         )
         self.send_task(enrichment_task)
 
@@ -169,4 +189,6 @@ class KartonPcapMiner(Karton):
                 self.log.info("Results:")
                 for k, v in results_filtered.items():
                     self.log.info("%s: %s", k, len(v))
-                self.report_results(task.get_payload("sample"), results=results_filtered)
+                self.report_results(
+                    task.get_payload("sample"), results=results_filtered
+                )

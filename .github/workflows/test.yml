@@ -1,0 +1,16 @@
+name: Test the code
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: CERT-Polska/lint-python-action@v2
+        with:
+          source: karton/
+          python-version: "3.10"
