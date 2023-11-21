@@ -88,9 +88,10 @@ class KartonPcapMiner(Karton):
         self.max_results = self.config.getint("pcap-miner", "max_results", fallback=24)
 
         self.ignorelist = {}
-        if self.config.get("pcap-miner", "ignore_list"):
-            with open(self.config.get("pcap-miner", "ignore_list"), "r") as f:
-                self.ignorelist = json.load(f)
+        ignore_path = self.config.get("pcap-miner", "ignore_list")
+        if ignore_path:
+            self.ignorelist = json.loads(Path(ignore_path).read_text())
+            self.log.info("Loaded ignorelist from %s", ignore_path)
 
         self.analyzers = {
             "network-http": (
