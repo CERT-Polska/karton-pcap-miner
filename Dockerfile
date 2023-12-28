@@ -1,4 +1,5 @@
 FROM python:3.10-slim
+SHELL ["/bin/bash", "-c"]
 
 WORKDIR /usr/src/app
 
