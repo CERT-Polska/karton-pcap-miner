@@ -46,7 +46,7 @@ Some samples may purposely generate a huge number of TCP/DNS connections. The `m
 
 ### Max PCAP size
 
-Processing huge (>100MB) PCAP files can change a considerable amount of time. Use the `max_pcap_size` option to specify the maximum PCAP file size to be analyzed (in bytes).
+Processing huge (>100MB) PCAP files can take a considerable amount of time. Use the `max_pcap_size` option to specify the maximum PCAP file size to be analyzed (in bytes).
 
 ### Indicator ignorelist
 
