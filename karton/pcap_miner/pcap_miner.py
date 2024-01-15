@@ -179,7 +179,11 @@ class KartonPcapMiner(Karton):
                 return
 
             if self.max_pcap_size and pcap_file.size > self.max_pcap_size:
-                self.log.info("PCAP file size (%s) exceeds the configured limit (%s)", pcap_file.size, self.max_pcap_size)
+                self.log.info(
+                    "PCAP file size (%s) exceeds the configured limit (%s)",
+                    pcap_file.size,
+                    self.max_pcap_size,
+                )
                 return
 
             pcap_file.download_to_file(temp_dir / "dump.pcap")
