@@ -87,6 +87,9 @@ class KartonPcapMiner(Karton):
         # do not report artifacts if number of results exceeds max_results
         self.max_results = self.config.getint("pcap-miner", "max_results", fallback=24)
 
+        # do not analyze PCAP files exceeding this size
+        self.max_pcap_size = self.config.getint("pcap-miner", "max_pcap_size")
+
         self.ignorelist = {}
         if self.config.get("pcap-miner", "ignore_list"):
             with open(self.config.get("pcap-miner", "ignore_list"), "r") as f:
@@ -172,7 +175,11 @@ class KartonPcapMiner(Karton):
             tlsmon_log = task.get_payload("tlsmon.log")
 
             if not pcap_file:
-                self.log.info("No pcap file, nothing to do...")
+                self.log.info("No PCAP file, nothing to do...")
+                return
+
+            if self.max_pcap_size and pcap_file.size > self.max_pcap_size:
+                self.log.info("PCAP file size (%s) exceeds the configured limit (%s)", pcap_file.size, self.max_pcap_size)
                 return
 
             pcap_file.download_to_file(temp_dir / "dump.pcap")

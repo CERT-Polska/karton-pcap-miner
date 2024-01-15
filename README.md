@@ -44,6 +44,10 @@ Set the `vm_ip_range` value to specify the range of IP addresses used by VMs. Th
 
 Some samples may purposely generate a huge number of TCP/DNS connections. The `max_results` configures the maximum number of results reported for a given analyzer. If The number exceeds the configured value, no values are reported at all. Set to `-1` to always report all results.
 
+### Max PCAP size
+
+Processing huge (>100MB) PCAP files can change a considerable amount of time. Use the `max_pcap_size` option to specify the maximum PCAP file size to be analyzed (in bytes).
+
 ### Indicator ignorelist
 
 In some cases you don't really want to report some of the indicators that come up in almost all PCAPs. Things like OCSP, UPNP, telemetry appears very frequently and doesn't provide any analytic value per se.
