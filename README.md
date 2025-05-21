@@ -11,6 +11,18 @@ Extract network indicators from analysis PCAPs and add push them to MWDB as attr
 * tshark (`apt install tshark`)
 * karton-core
 
+### MWDB setup
+
+This karton services produces output tasks with the following attributes:
+
+* `network-http`
+* `network-tcp`
+* `network-sni`
+* `network-dns`
+
+In order to properly report the results to MWDB you need to [manually declare the attributes](https://mwdb.readthedocs.io/en/latest/user-guide/6-Object-attributes.html#declaring-new-attribute) and make sure that the user used by the karton-mwdb-reporter has write permissions.
+
+
 ## Built-in analyzers
 
  * **http**
