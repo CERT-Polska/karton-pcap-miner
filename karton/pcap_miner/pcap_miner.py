@@ -96,14 +96,28 @@ class KartonPcapMiner(Karton):
             self.ignorelist = json.loads(Path(ignore_path).read_text())
             self.log.info("Loaded ignorelist from %s", ignore_path)
 
+        self._whitelisted_proto = "eth,sll,ip,ipv6,tcp,http,tls,udp,dns"
+
         self.analyzers = {
             "network-http": (
-                ["-T", "fields", "-e", "http.request.full_uri"],
+                [
+                    "--only-protocols",
+                    self._whitelisted_proto,
+                    "-T",
+                    "fields",
+                    "-e",
+                    "http.request.full_uri",
+                ],
                 self.default_parser,
             ),
-            "network-tcp": (["-z", "conv,tcp"], self.parse_tcp_conv),
+            "network-tcp": (
+                ["--only-protocols", self._whitelisted_proto, "-z", "conv,tcp"],
+                self.parse_tcp_conv,
+            ),
             "network-sni": (
                 [
+                    "--only-protocols",
+                    self._whitelisted_proto,
                     "-Y",
                     'ssl.handshake.extension.type == "server_name"',
                     "-T",
@@ -116,7 +130,16 @@ class KartonPcapMiner(Karton):
                 self.parse_sni_output,
             ),
             "network-dns": (
-                ["-Y", "dns.flags.response == 0", "-T", "fields", "-e", "dns.qry.name"],
+                [
+                    "--only-protocols",
+                    self._whitelisted_proto,
+                    "-Y",
+                    "dns.flags.response == 0",
+                    "-T",
+                    "fields",
+                    "-e",
+                    "dns.qry.name",
+                ],
                 self.default_parser,
             ),
         }
@@ -201,6 +224,6 @@ class KartonPcapMiner(Karton):
                 self.log.info("Results:")
                 for k, v in results_filtered.items():
                     self.log.info("%s: %s", k, len(v))
-                self.report_results(
-                    task.get_payload("sample"), results=results_filtered
-                )
+                # self.report_results(
+                #     task.get_payload("sample"), results=results_filtered
+                # )
