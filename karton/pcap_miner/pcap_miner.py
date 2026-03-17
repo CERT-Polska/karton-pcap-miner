@@ -224,6 +224,6 @@ class KartonPcapMiner(Karton):
                 self.log.info("Results:")
                 for k, v in results_filtered.items():
                     self.log.info("%s: %s", k, len(v))
-                # self.report_results(
-                #     task.get_payload("sample"), results=results_filtered
-                # )
+                self.report_results(
+                    task.get_payload("sample"), results=results_filtered
+                )
