@@ -1,18 +1,14 @@
-FROM python:3.13-slim
-SHELL ["/bin/bash", "-c"]
+FROM python:3.14-slim-trixie
 
-WORKDIR /usr/src/app
-
-RUN apt-get update && apt-get install -y \
-    tshark \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        tshark \
  && rm -rf /var/lib/apt/lists/*
 
-COPY ./requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r ./requirements.txt
-
-COPY ./README.md ./README.md
-COPY ./karton ./karton
-COPY ./setup.py ./setup.py
-
+WORKDIR /app/service
+COPY requirements.txt ./requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt setuptools
+COPY README.md ./README.md
+COPY karton ./karton
+COPY setup.py ./setup.py
 RUN pip install .
-ENTRYPOINT karton-pcap-miner
+ENTRYPOINT ["karton-pcap-miner"]

@@ -45,6 +45,9 @@ class KartonPcapMiner(Karton):
             "kind": "drakrun",
         }
     ]
+    egress_filters = [
+        {"type": "sample", "stage": "analyzed"},
+    ]
 
     def select_nonlocal_ip(self, ip_a: str, ip_b: str) -> str:
         if ipaddress.ip_address(extract_ip(ip_a)) in self.vm_ip_range:
